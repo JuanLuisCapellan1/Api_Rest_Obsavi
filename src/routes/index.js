@@ -5,6 +5,8 @@ const optionRoutes = require('./option')
 const router = express.Router()
 const surveyRoutes = require('./survey')
 const suggestionRoutes = require('./suggestions')
+const departmentRoutes = require('./department')
+const commentRoutes = require('./comment')
 
 router.get('/', (req, res) => res.json({message: 'Welcome Home!'}))
 router.use(userRoutes)
@@ -12,5 +14,7 @@ router.use(categoryRoutes)
 router.use(optionRoutes)
 router.use(surveyRoutes)
 router.use(suggestionRoutes)
+router.use(departmentRoutes)
+router.use(commentRoutes)
 
 module.exports = router
