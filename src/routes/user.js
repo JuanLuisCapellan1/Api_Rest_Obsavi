@@ -15,8 +15,9 @@ userRoutes.post('/signUp', async (req, res) => {
     }else{
       const connection = await getConnection();
       const passwordEncrypted = await encryptPassword(password)
-
-      connection.query(`SELECT * FROM USERS WHERE email = '${email}'`, function(err, result, _fields){
+      
+      let sqlSelectEmail = 'SELECT * FROM USERS WHERE email = ?'
+      connection.query(sqlSelectEmail, [email], function(err, result, _fields){
         if(err){
           res.status(500).json(err)
         }
@@ -24,7 +25,8 @@ userRoutes.post('/signUp', async (req, res) => {
           res.status(303).json({'message': 'This email is already in use'})
         }
         else{
-          connection.query(`SELECT * FROM USERS WHERE username = '${username}'`, function(err, result, _fields){
+          let sqlSelect = 'SELECT * FROM USERS WHERE username = ?'
+          connection.query(sqlSelect, [username], function(err, result, _fields){
             if(err){
               res.status(500).json(err)
             }
@@ -32,7 +34,8 @@ userRoutes.post('/signUp', async (req, res) => {
               res.status(303).json({'message': 'This username is already in use'})
             }
             else{
-              connection.query(`INSERT INTO USERS (username, email, password) VALUES ('${username}', '${email}', '${passwordEncrypted}')`,
+              let sql = 'INSERT INTO USERS (username, email, password) VALUES (?, ?, ?)'
+              connection.query(sql, [username, email, passwordEncrypted],
                 function(error, _results, _fields) {
                   if(error){
                     res.status(500).json(error)
@@ -61,8 +64,9 @@ userRoutes.post('/signIn', async (req, res) => {
         res.status(409).json({'error': 'Please provide a email'})
       }else {
         const connection = await getConnection();
-        connection.query(`SELECT id, email, password FROM users WHERE email = '${email}';`, 
-          async function(err, result, fields){
+        let sql = 'SELECT * FROM USERS WHERE email = ?'
+        connection.query(sql, [email], 
+          async function(err, result, _fields){
             if (err) {
               res.status(500).json(err)
             }
@@ -86,7 +90,8 @@ userRoutes.post('/signIn', async (req, res) => {
         res.status(409).json({'error': 'Please provide a username'})
       }else {
         const connection = await getConnection();
-        connection.query(`SELECT id, email, password FROM users WHERE username = '${username}';`, 
+        let sqlUsername = 'SELECT * FROM USERS WHERE username = ?'
+        connection.query(sqlUsername, [username], 
           async function(err, result, fields){
             if (err) {
               res.status(500).json(err)

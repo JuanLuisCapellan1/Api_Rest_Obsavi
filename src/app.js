@@ -5,7 +5,9 @@ const routesMain = require('../src/routes/index')
 const session = require('express-session')
 const bodyParser = require('body-parser')
 
-const app = express()
+let helmet = require("helmet");
+let app = express();
+app.use(helmet.hidePoweredBy());
 
 app.use(bodyParser.urlencoded({
   extended: true

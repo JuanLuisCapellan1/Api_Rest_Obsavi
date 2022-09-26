@@ -2,10 +2,11 @@ const express = require('express')
 const { getConnection } = require('../database/db')
 const categoryRoutes = express.Router()
 
-categoryRoutes.get('/categories', async (req, res) => {
+categoryRoutes.get('/categories', async (_req, res) => {
   try {
     const connection = await getConnection()
-    connection.query('SELECT * FROM CATEGORIES', function(err, result, _fields){
+    let sql = 'SELECT * FROM CATEGORIES'
+    connection.query(sql, function(err, result, _fields){
       if(err){
         res.status(500).json(err)
       }
@@ -28,7 +29,8 @@ categoryRoutes.post('/category', async (req, res) => {
         res.status(409).json({'error': 'Please provide a category Name'})
       }else{
         const connection = await getConnection() 
-        connection.query(`INSERT INTO CATEGORIES (NAME) VALUES ('${name}')`, function(err, result, _fields){
+        let sql = 'INSERT INTO CATEGORIES (NAME) VALES (?)'
+        connection.query(sql, [name], function(err, result, _fields){
           if(err){
             res.status(500).json(err)
           }
