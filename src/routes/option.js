@@ -105,9 +105,9 @@ optionRoutes.get('/optionSelectedByCategoryId', async (req, res) => {
 optionRoutes.post('/option', async (req, res) => {
   if(req.session.user){
     try {
-      const { name, categoryId, selected } = req.body
-      if(!name || name === '' || !categoryId || categoryId === null || !selected || selected === null){
-        res.status(409).json({'error': 'Please provide a option Name and categoryId and selected'})
+      const { name, categoryId } = req.body
+      if(!name || name === '' || !categoryId || categoryId === null){
+        res.status(409).json({'error': 'Please provide a option Name and categoryId'})
       }else{
         const connection = await getConnection() 
         let sqlVerify = 'SELECT * FROM OPTIONS WHERE NAME = ?'
@@ -119,8 +119,8 @@ optionRoutes.post('/option', async (req, res) => {
             res.status(303).json({'message': 'This option already exists'})
           }
           else{
-            let sql = 'INSERT INTO OPTIONS (NAME, CATEGORY_ID, SELECTED) VALUES (?, ?, ?)'
-            connection.query(sql, [name, categoryId, selected], function(err, result, _fields){
+            let sql = 'INSERT INTO OPTIONS (NAME, CATEGORY_ID) VALUES (?, ?)'
+            connection.query(sql, [name, categoryId], function(err, result, _fields){
               if(err){
                 res.status(500).json(err)
               }
