@@ -199,5 +199,35 @@ optionRoutes.put('/option', async (req, res) => {
   }
 })
 
+optionRoutes.put('/option/selected', async (req, res) => {
+  if(req.session.user){
+    try {
+      const {selected, id} = req.body
+      if(!selected || !id || selected === '' || id === null){
+        res.status(409).json({'error': 'Please provide a selected and id'})
+      }
+      else{
+        const sql = 'UPDATE OPTIONS SET SELECTED = ? WHERE ID = ?'
+        const connection = await getConnection()
+        connection.query(sql, [selected, id], function(error, result, _fields){
+          if(error){
+            res.status(500).json(error)
+          }
+          else if(result.affectedRows > 0){
+            res.status(200).json({'affectedRows': result.affectedRows})
+          }else{
+            res.status(401).json({'message': 'This option not exists'})
+          }
+        })
+      } 
+    } catch (error) {
+      res.status(500).json(error)
+    }
+  }
+  else{
+    res.status(401).json({ 'message': 'you must logIn first'})
+  }
+})
+
 
 module.exports = optionRoutes
