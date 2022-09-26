@@ -117,13 +117,24 @@ categoryRoutes.post('/category', async (req, res) => {
         res.status(409).json({'error': 'Please provide a category Name'})
       }else{
         const connection = await getConnection() 
-        let sql = 'INSERT INTO CATEGORIES (NAME) VALUES (?)'
-        connection.query(sql, [name], function(err, result, _fields){
+        const sqlVerify ='SELECT * FROM CATEGORIES WHERE NAME = ?'
+        connection.query(sqlVerify, [name], function(err, result, _fields){
           if(err){
             res.status(500).json(err)
           }
+          else if(result.length > 0) {
+            res.status(303).json({'message': 'This category already exists'})
+          }
           else{
-            res.status(200).json({categorySaved: result.insertId})
+            let sql = 'INSERT INTO CATEGORIES (NAME) VALUES (?)'
+            connection.query(sql, [name], function(err, result, _fields){
+              if(err){
+                res.status(500).json(err)
+              }
+              else{
+                res.status(200).json({categorySaved: result.insertId})
+              }
+            })
           }
         })
       }
