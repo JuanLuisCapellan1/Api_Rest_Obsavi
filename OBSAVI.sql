@@ -10,12 +10,15 @@ create table users(
     password varchar(255) not null,
     created_at timestamp default current_timestamp
 );
+select * from users;
+truncate table users;
 
 drop table if exists comments;
 create table comments(
 	id int auto_increment primary key,
     message text not null,
     author varchar(64) not null,
+    image blob default null,
     created_at timestamp default current_timestamp
 );
 
@@ -24,6 +27,7 @@ create table categories(
 	id int auto_increment primary key,
     name varchar(255) not null
 );
+select * from categories;
 
 drop table if exists options;
 create table options(
