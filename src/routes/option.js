@@ -62,7 +62,7 @@ optionRoutes.get('/optionByCategory', async (req, res) => {
           res.status(500).json(error)
         }
         else if(result.length > 0){
-          res.status(200).json({"data": result})
+          res.status(200).json(result)
         }
         else{
           res.status(401).json({'message': 'This option not exists'})
@@ -103,66 +103,57 @@ optionRoutes.get('/optionSelectedByCategoryId', async (req, res) => {
 
 
 optionRoutes.post('/option', async (req, res) => {
-  if(req.session.user){
-    try {
-      const { name, categoryId } = req.body
-      if(!name || name === '' || !categoryId || categoryId === null){
-        res.status(409).json({'error': 'Please provide a option Name and categoryId'})
-      }else{
-        const connection = await getConnection() 
-        let sqlVerify = 'SELECT * FROM OPTIONS WHERE NAME = ?'
-        connection.query(sqlVerify, [name], function(err, result, _fields) {
-          if(err) {
-            res.status(500).json(err)
-          }
-          else if(result.length > 0) {
-            res.status(303).json({'message': 'This option already exists'})
-          }
-          else{
-            let sql = 'INSERT INTO OPTIONS (NAME, CATEGORY_ID) VALUES (?, ?)'
-            connection.query(sql, [name, categoryId], function(err, result, _fields){
-              if(err){
-                res.status(500).json(err)
-              }
-              else{
-                res.status(200).json({optionSaved: result.insertId})
-              }
-            })
-          }
-        })
-      }
-    } catch (error) {
-      res.status(500).json(error)
+  try {
+    const { name, categoryId } = req.body
+    if(!name || name === '' || !categoryId || categoryId === null){
+      res.status(409).json({'error': 'Please provide a option Name and categoryId'})
+    }else{
+      const connection = await getConnection() 
+      let sqlVerify = 'SELECT * FROM OPTIONS WHERE NAME = ? AND category_id = ?'
+      connection.query(sqlVerify, [name, categoryId], function(err, result, _fields) {
+        if(err) {
+          res.status(500).json(err)
+        }
+        else if(result.length > 0) {
+          res.status(303).json({'message': 'This option already exists'})
+        }
+        else{
+          let sql = 'INSERT INTO OPTIONS (NAME, CATEGORY_ID) VALUES (?, ?)'
+          connection.query(sql, [name, categoryId], function(err, result, _fields){
+            if(err){
+              res.status(500).json(err)
+            }
+            else{
+              res.status(200).json({optionSaved: result.insertId})
+            }
+          })
+        }
+      })
     }
-  }else{
-    res.status(401).json({ 'message': 'you must logIn first'})
+  } catch (error) {
+    res.status(500).json(error)
   }
 })
 
 optionRoutes.delete('/option', async (req, res) => {
   try {
-    if(req.session.user){
-      const {id} = req.query
-      if(!id){
-        res.status(409).json({'error': 'Please provide an id'})
-      }
-      else{
-        const sql = `DELETE FROM OPTIONS WHERE id = ?`
-        const connection = await getConnection()
-        connection.query(sql, [id], function(error, result, _fields){
-          if(error){
-            res.status(500).json(error)
-          }
-          else if(result.affectedRows > 0){
-            res.status(200).json({'affectedRows': result.affectedRows})
-          }else{
-            res.status(401).json({'message': 'This option not exists'})
-          }
-        }) 
-      }
+    const {id} = req.query
+    if(!id){
+      res.status(409).json({'error': 'Please provide an id'})
     }
     else{
-      res.status(401).json({ 'message': 'you must logIn first'})
+      const sql = `DELETE FROM OPTIONS WHERE id = ?`
+      const connection = await getConnection()
+      connection.query(sql, [id], function(error, result, _fields){
+        if(error){
+          res.status(500).json(error)
+        }
+        else if(result.affectedRows > 0){
+          res.status(200).json({'affectedRows': result.affectedRows})
+        }else{
+          res.status(401).json({'message': 'This option not exists'})
+        }
+      }) 
     }
   } catch (error) {
     res.status(500).json(error)
@@ -170,62 +161,52 @@ optionRoutes.delete('/option', async (req, res) => {
 })
 
 optionRoutes.put('/option', async (req, res) => {
-  if(req.session.user){
-    try {
-      const {name, id} = req.body
-      if(!name || !id || name === '' || id === null){
-        res.status(409).json({'error': 'Please provide a name and id'})
-      }
-      else{
-        const sql = 'UPDATE OPTIONS SET NAME = ? WHERE ID = ?'
-        const connection = await getConnection()
-        connection.query(sql, [name, id], function(error, result, _fields){
-          if(error){
-            res.status(500).json(error)
-          }
-          else if(result.affectedRows > 0){
-            res.status(200).json({'affectedRows': result.affectedRows})
-          }else{
-            res.status(401).json({'message': 'This option not exists'})
-          }
-        })
-      } 
-    } catch (error) {
-      res.status(500).json(error)
+  try {
+    const {name, id} = req.body
+    if(!name || !id || name === '' || id === null){
+      res.status(409).json({'error': 'Please provide a name and id'})
     }
-  }
-  else{
-    res.status(401).json({ 'message': 'you must logIn first'})
+    else{
+      const sql = 'UPDATE OPTIONS SET NAME = ? WHERE ID = ?'
+      const connection = await getConnection()
+      connection.query(sql, [name, id], function(error, result, _fields){
+        if(error){
+          res.status(500).json(error)
+        }
+        else if(result.affectedRows > 0){
+          res.status(200).json({'affectedRows': result.affectedRows})
+        }else{
+          res.status(401).json({'message': 'This option not exists'})
+        }
+      })
+    } 
+  } catch (error) {
+    res.status(500).json(error)
   }
 })
 
 optionRoutes.put('/option/selected', async (req, res) => {
-  if(req.session.user){
-    try {
-      const {selected, id} = req.body
-      if(!selected || !id || selected === '' || id === null){
-        res.status(409).json({'error': 'Please provide a selected and id'})
-      }
-      else{
-        const sql = 'UPDATE OPTIONS SET SELECTED = ? WHERE ID = ?'
-        const connection = await getConnection()
-        connection.query(sql, [selected, id], function(error, result, _fields){
-          if(error){
-            res.status(500).json(error)
-          }
-          else if(result.affectedRows > 0){
-            res.status(200).json({'affectedRows': result.affectedRows})
-          }else{
-            res.status(401).json({'message': 'This option not exists'})
-          }
-        })
-      } 
-    } catch (error) {
-      res.status(500).json(error)
+  try {
+    const {selected, id} = req.body
+    if(!selected || !id || selected === '' || id === null){
+      res.status(409).json({'error': 'Please provide a selected and id'})
     }
-  }
-  else{
-    res.status(401).json({ 'message': 'you must logIn first'})
+    else{
+      const sql = 'UPDATE OPTIONS SET SELECTED = ? WHERE ID = ?'
+      const connection = await getConnection()
+      connection.query(sql, [selected, id], function(error, result, _fields){
+        if(error){
+          res.status(500).json(error)
+        }
+        else if(result.affectedRows > 0){
+          res.status(200).json({'affectedRows': result.affectedRows})
+        }else{
+          res.status(401).json({'message': 'This option not exists'})
+        }
+      })
+    } 
+  } catch (error) {
+    res.status(500).json(error)
   }
 })
 
